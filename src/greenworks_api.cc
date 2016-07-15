@@ -219,6 +219,35 @@ NAN_METHOD(GetSteamId) {
   info.GetReturnValue().Set(result);
 }
 
+NAN_METHOD(GetFriendCount) {
+  Nan::HandleScope scope;
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(
+    SteamFriends()->GetFriendCount(k_EFriendFlagImmediate)));
+}
+
+NAN_METHOD(GetFriends) {
+  Nan::HandleScope scope;
+
+  int friendsCount = SteamFriends()->GetFriendCount(k_EFriendFlagImmediate);
+  v8::Local<v8::Array> friends = Nan::New<v8::Array>();
+
+  for ( int i = 0; i < friendsCount; i++ ) {
+      CSteamID friendSteamID = SteamFriends()->GetFriendByIndex( i, k_EFriendFlagImmediate );
+      v8::Local<v8::Object> aFriend = Nan::New<v8::Object>();
+      aFriend->Set(Nan::New("accountId").ToLocalChecked(), Nan::New<v8::Integer>(friendSteamID.GetAccountID()));
+      if (!SteamFriends()->RequestUserInformation(friendSteamID, true)) {
+          aFriend->Set(Nan::New("screenName").ToLocalChecked(),
+              Nan::New(SteamFriends()->GetFriendPersonaName(friendSteamID)).ToLocalChecked());
+      } else {
+        std::ostringstream sout;
+        sout << friendSteamID.GetAccountID();
+        aFriend->Set(Nan::New("screenName").ToLocalChecked(), Nan::New(sout.str()).ToLocalChecked());
+      }
+      friends->Set(i, aFriend);
+  }
+  info.GetReturnValue().Set(friends);
+}
+
 NAN_METHOD(SaveTextToFile) {
   Nan::HandleScope scope;
 
@@ -792,6 +821,13 @@ NAN_MODULE_INIT(init) {
   Nan::Set(target,
            Nan::New("getSteamId").ToLocalChecked(),
            Nan::New<v8::FunctionTemplate>(GetSteamId)->GetFunction());
+  // Friends related APIs.
+  Nan::Set(target,
+           Nan::New("getFriendCount").ToLocalChecked(),
+           Nan::New<v8::FunctionTemplate>(GetFriendCount)->GetFunction());
+  Nan::Set(target,
+           Nan::New("getFriends").ToLocalChecked(),
+           Nan::New<v8::FunctionTemplate>(GetFriends)->GetFunction());     
   // File related APIs.
   Nan::Set(target,
            Nan::New("saveTextToFile").ToLocalChecked(),

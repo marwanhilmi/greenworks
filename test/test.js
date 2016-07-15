@@ -87,4 +87,12 @@ describe('greenworks API', function() {
       }, function(err) { throw err; done(); });
     });
   });
+
+  describe('getFriends', function() {
+    it('Should get successfully', function(done) {
+      assert(typeof greenworks.getFriendCount(), 'number')
+      assert(greenworks.getFriends())
+      done()
+    });
+  });
 });

@@ -95,4 +95,11 @@ describe('greenworks API', function() {
       done()
     });
   });
+
+  describe('shutdown', function() {
+    it('Should shutdown and API access should fail', function(done) {
+      greenworks.shutdown()
+      done()
+    });
+  });
 });

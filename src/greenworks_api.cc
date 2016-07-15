@@ -166,6 +166,13 @@ NAN_METHOD(InitAPI) {
   info.GetReturnValue().Set(Nan::New(success));
 }
 
+NAN_METHOD(Shutdown) {
+  Nan::HandleScope scope;
+  SteamAPI_ReleaseCurrentThreadMemory();
+  SteamAPI_Shutdown();
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
 NAN_METHOD(GetSteamId) {
   Nan::HandleScope scope;
   CSteamID user_id = SteamUser()->GetSteamID();
@@ -818,6 +825,9 @@ NAN_MODULE_INIT(init) {
   Nan::Set(target,
            Nan::New("initAPI").ToLocalChecked(),
            Nan::New<v8::FunctionTemplate>(InitAPI)->GetFunction());
+  Nan::Set(target,
+          Nan::New("shutdown").ToLocalChecked(),
+          Nan::New<v8::FunctionTemplate>(Shutdown)->GetFunction());
   Nan::Set(target,
            Nan::New("restartAppIfNecessary").ToLocalChecked(),
            Nan::New<v8::FunctionTemplate>(RestartAppIfNecessary)->GetFunction());
